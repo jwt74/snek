@@ -1,0 +1,12 @@
+# Import cache
+.import/
+
+.tgz
+git_api*
+*.translation
+export_presets.cfg
+
+# Binaries
+bin/
+build/
+lib/
