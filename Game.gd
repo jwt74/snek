@@ -1,13 +1,13 @@
 extends Node2D
 
-const SnakePart = preload("res://SnakePart.tscn")
+const SnekPart = preload("res://SnakePart.tscn")
 const Food = preload("res://Food.tscn")
 const Wall = preload("res://Wall.tscn")
 
-export (int) var SNAKEPART_SIZE = 10
-export (int) var SNAKE_GROW = 2
-export (int) var SNAKE_LEN = 5
-export (Vector2) var SNAKE_POS = Vector2 (10, 15)
+export (int) var SNEKPART_SIZE = 10
+export (int) var SNEK_GROW = 2
+export (int) var SNEK_LEN = 5
+export (Vector2) var SNEK_POS = Vector2 (10, 15)
 export (Vector2) var WINDOW = Vector2 (40, 30)
 
 const NORTH = 0
@@ -28,7 +28,7 @@ export (Color) var bodyColor
 export (Color) var foodColor
 export (Color) var wallColor
 
-var Snake = []
+var Snek = []
 
 func _physics_process(_delta):
 	if Input.is_action_just_released("ui_left"):
@@ -50,46 +50,52 @@ func _ready():
 	start_game()
 	
 func start_game():
-	for x in range(SNAKE_POS.x, SNAKE_POS.x + SNAKE_LEN):
-		var snakePart = SnakePart.instance()
-		place_part(snakePart, Vector2(x * SNAKEPART_SIZE, SNAKE_POS.y * SNAKEPART_SIZE), bodyColor)
-		Snake.append(snakePart)
-	Snake[-1].connect("snake_dead", self, "on_snake_dead")	
+	for x in range(SNEK_POS.x, SNEK_POS.x + SNEK_LEN):
+		var snekPart = SnekPart.instance()
+		place_part(snekPart, Vector2(x * SNEKPART_SIZE, SNEK_POS.y * SNEKPART_SIZE), bodyColor)
+		Snek.append(snekPart)
+	Snek[-1].connect("snake_dead", self, "on_snake_dead")	
 	place_food()
 	$Timer.start()
 	
 func draw_walls():
 	for x in range(0, WINDOW.x):
-		place_part(Wall.instance(), Vector2(x * SNAKEPART_SIZE, 0), wallColor)
-		place_part(Wall.instance(), Vector2(x * SNAKEPART_SIZE, (WINDOW.y - 1) * SNAKEPART_SIZE), wallColor)
+		place_part(Wall.instance(), Vector2(x * SNEKPART_SIZE, 0), wallColor)
+		place_part(Wall.instance(), Vector2(x * SNEKPART_SIZE, (WINDOW.y - 1) * SNEKPART_SIZE), wallColor)
 	for y in range(0, WINDOW.y):
-		place_part(Wall.instance(), Vector2(0 , y * SNAKEPART_SIZE), wallColor)
-		place_part(Wall.instance(), Vector2((WINDOW.x - 1) * SNAKEPART_SIZE, y * SNAKEPART_SIZE), wallColor)
+		place_part(Wall.instance(), Vector2(0 , y * SNEKPART_SIZE), wallColor)
+		place_part(Wall.instance(), Vector2((WINDOW.x - 1) * SNEKPART_SIZE, y * SNEKPART_SIZE), wallColor)
 
 func place_part(part_instance: Node2D, pos: Vector2, color: Color):
 	part_instance.position = Vector2(pos)
 	add_child(part_instance)
 	part_instance.setColor(color)
 	
+func in_snek(pos: Vector2):
+	for snekPart in Snek:
+		if int(pos.x) == snekPart.position.x and int(pos.y == snekPart.position.y):
+			return true
+	return false
+	
 func update_snake():
 	if(grow > 0):
 		grow -= 1
 	else:
-		Snake.pop_front().queue_free()
+		Snek.pop_front().queue_free()
 
 	#place new head
-	var head_pos = Snake[-1].position
-	Snake[-1].setColor(bodyColor)
-	Snake[-1].disconnect("snake_dead", self, "on_snake_dead")
+	var head_pos = Snek[-1].position
+	Snek[-1].setColor(bodyColor)
+	Snek[-1].disconnect("snake_dead", self, "on_snake_dead")
 
 	facing = (facing + dirchange) % 4
 	dirchange = 0
-	var posx = head_pos.x + (directions[facing].x * SNAKEPART_SIZE)
-	var posy = head_pos.y + (directions[facing].y * SNAKEPART_SIZE)
+	var posx = head_pos.x + (directions[facing].x * SNEKPART_SIZE)
+	var posy = head_pos.y + (directions[facing].y * SNEKPART_SIZE)
 
-	var newHead = SnakePart.instance()
+	var newHead = SnekPart.instance()
 	place_part(newHead, Vector2(posx, posy), headColor)
-	Snake.append(newHead)
+	Snek.append(newHead)
 	newHead.connect("snake_dead", self, "on_snake_dead")	
 
 func _on_Timer_timeout():
@@ -109,12 +115,18 @@ func place_food():
 	food.setColor(foodColor)
 	
 func move_food():
-	food.position = Vector2(SNAKEPART_SIZE * (randi() % int(WINDOW.x)), SNAKEPART_SIZE * (randi() % int(WINDOW.y)))
-	
+	var pos:Vector2 = get_random_pos()
+	while in_snek(pos):
+		pos = get_random_pos()
+	food.position = pos
+
+func get_random_pos():
+	return Vector2(SNEKPART_SIZE * (randi() % int(WINDOW.x)), SNEKPART_SIZE * (randi() % int(WINDOW.y)))
+		
 func on_food_eaten():
 	$Timer.stop()
 	move_food()
-	grow += SNAKE_GROW
+	grow += SNEK_GROW
 	$Timer.start()
 	
 func on_snake_dead():
@@ -122,9 +134,9 @@ func on_snake_dead():
 
 func restart_game():
 	food.queue_free()
-	for snakePart in Snake:
-		snakePart.queue_free()
-	Snake.resize(0)
+	for snekPart in Snek:
+		snekPart.queue_free()
+	Snek.resize(0)
 	dead = false
 	facing = EAST
 	grow = 0
