@@ -78,10 +78,13 @@ func in_snek(pos: Vector2):
 	return false
 	
 func update_snake():
+	var newHead: Node2D = null
+	
 	if(grow > 0):
 		grow -= 1
+		newHead = SnekPart.instance()
 	else:
-		Snek.pop_front().queue_free()
+		newHead = Snek.pop_front()
 
 	#place new head
 	var head_pos = Snek[-1].position
@@ -93,7 +96,6 @@ func update_snake():
 	var posx = head_pos.x + (directions[facing].x * SNEKPART_SIZE)
 	var posy = head_pos.y + (directions[facing].y * SNEKPART_SIZE)
 
-	var newHead = SnekPart.instance()
 	place_part(newHead, Vector2(posx, posy), headColor)
 	Snek.append(newHead)
 	newHead.connect("snake_dead", self, "on_snake_dead")	
