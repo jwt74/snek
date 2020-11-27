@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Game.gd" type="Script" id=1]
+[ext_resource path="res://Grass.png" type="Texture" id=2]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 1 )
@@ -12,4 +13,13 @@ wallColor = Color( 0.0666667, 0.152941, 0.0117647, 1 )
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.155
 autostart = true
+
+[node name="Background" type="TextureRect" parent="."]
+margin_right = 400.0
+margin_bottom = 300.0
+texture = ExtResource( 2 )
+stretch_mode = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
