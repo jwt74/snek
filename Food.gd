@@ -6,9 +6,8 @@ onready var colorRect = $ColorRect
 
 func _on_Hurtbox_area_entered(_area):
 	emit_signal("food_eaten")
-	queue_free()
 	
-func setColor(newcolor):
+func setColor(newcolor: Color):
 	colorRect.color = newcolor
 
 func getColor():
